@@ -1,0 +1,38 @@
+{
+  "rooms": [
+    {
+      "id": "1",
+      "roomNumber": "101",
+      "category": "Стандарт",
+      "capacity": 2,
+      "price": 1200,
+      "status": "Вільний"
+    },
+    {
+      "id": "2",
+      "roomNumber": "202",
+      "category": "Люкс",
+      "capacity": 3,
+      "price": 2500,
+      "status": "Зайнятий"
+    },
+    {
+      "id": "3",
+      "roomNumber": "303",
+      "category": "Напівлюкс",
+      "capacity": 2,
+      "price": 1800,
+      "status": "Вільний"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "1",
+      "roomId": "2",
+      "guestName": "Олена Шевченко",
+      "checkInDate": "2026-11-01",
+      "checkOutDate": "2026-11-05",
+      "status": "Заселено"
+    }
+  ]
+}
