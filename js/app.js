@@ -1,16 +1,61 @@
-const API_URL = 'http://localhost:3000/rooms';
+const API_URL = 'http://localhost:3000';
 
-async function loadRooms() {
-    try {
-        const response = await fetch(API_URL);
+class RoomRepository {
+    static async getAll() {
+        const response = await fetch(`${API_URL}/rooms`);
         if (!response.ok) {
             throw new Error('Помилка завантаження даних');
         }
-        const rooms = await response.json();
+        return await response.json();
+    }
+}
+
+class BookingRepository {
+    static async getAll() {
+        const response = await fetch(`${API_URL}/bookings`);
+        if (!response.ok) {
+            throw new Error('Помилка завантаження бронювань');
+        }
+        return await response.json();
+    }
+}
+
+class NotificationService {
+    constructor() {
+        if (NotificationService.instance) {
+            return NotificationService.instance;
+        }
+        this.msgBox = document.getElementById('status-message');
+        NotificationService.instance = this;
+    }
+
+    showError(text) {
+        if (!this.msgBox) return;
+        this.msgBox.className = 'message-box error';
+        this.msgBox.textContent = text;
+        this.msgBox.classList.remove('hidden');
+    }
+
+    showSuccess(text) {
+        if (!this.msgBox) return;
+        this.msgBox.className = 'message-box success';
+        this.msgBox.textContent = text;
+        this.msgBox.classList.remove('hidden');
+    }
+}
+
+const notifier = new NotificationService();
+
+async function loadRooms() {
+    const container = document.getElementById('rooms-container');
+    if (!container) return;
+
+    try {
+        const rooms = await RoomRepository.getAll();
         displayRooms(rooms);
     } catch (error) {
         console.error('Помилка:', error);
-        document.getElementById('rooms-container').innerHTML = '<p style="color: red;">Не вдалося завантажити дані з сервера. Перевірте, чи запущено json-server.</p>';
+        notifier.showError('Не вдалося завантажити дані з сервера. Перевірте, чи запущено json-server.');
     }
 }
 

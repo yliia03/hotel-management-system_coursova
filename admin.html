@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель адміністратора — Готель</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="admin-header">
+        <h1>Панель адміністратора готелю</h1>
+        <a href="client.html" class="nav-link">Перейти на сторінку клієнта</a>
+    </header>
+
+    <main class="container">
+        <div id="status-message" class="message-box hidden"></div>
+
+        <section class="card">
+            <h2>Управління номерним фондом</h2>
+            <div id="admin-rooms-loader" class="loader">Завантаження номерів...</div>
+            <div id="rooms-container"></div>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
