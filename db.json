@@ -2,37 +2,36 @@
   "rooms": [
     {
       "id": "1",
-      "roomNumber": "101",
-      "category": "Стандарт",
-      "capacity": 2,
+      "number": 101,
+      "type": "Стандарт",
       "price": 1200,
-      "status": "Вільний"
+      "status": "доступний"
     },
     {
       "id": "2",
-      "roomNumber": "202",
-      "category": "Люкс",
-      "capacity": 3,
+      "number": 102,
+      "type": "Люкс",
       "price": 2500,
-      "status": "Зайнятий"
-    },
-    {
-      "id": "3",
-      "roomNumber": "303",
-      "category": "Напівлюкс",
-      "capacity": 2,
-      "price": 1800,
-      "status": "Вільний"
+      "status": "заброньовано"
     }
   ],
-  "bookings": [
+  "requests": [
     {
       "id": "1",
+      "roomId": "1",
+      "clientName": "Іван Петренко",
+      "clientPhone": "+380671234567",
+      "status": "Підтверджено",
+      "createdAt": "2026-11-03T10:00:00Z"
+    },
+    {
       "roomId": "2",
-      "guestName": "Олена Шевченко",
-      "checkInDate": "2026-11-01",
-      "checkOutDate": "2026-11-05",
-      "status": "Заселено"
+      "clientName": "Дужак Юлія Андрііївна",
+      "clientPhone": "+380984272885",
+      "status": "Підтверджено",
+      "createdAt": "2026-11-03T18:14:54.432Z",
+      "id": "hrppKzboYsg"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }

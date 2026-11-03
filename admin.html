@@ -2,26 +2,115 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Панель адміністратора — Готель</title>
+    <title>Панель адміністратора</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header class="admin-header">
+    <header>
         <h1>Панель адміністратора готелю</h1>
-        <a href="client.html" class="nav-link">Перейти на сторінку клієнта</a>
+        <a href="client.html" style="color: white; text-decoration: underline;">Перейти на сторінку клієнта</a>
     </header>
 
-    <main class="container">
-        <div id="status-message" class="message-box hidden"></div>
+    <main>
+        <div id="notification"></div>
 
-        <section class="card">
+        <section>
             <h2>Управління номерним фондом</h2>
-            <div id="admin-rooms-loader" class="loader">Завантаження номерів...</div>
-            <div id="rooms-container"></div>
+            <div id="rooms-container">Завантаження номерів...</div>
+        </section>
+
+        <section style="margin-top: 30px;">
+            <h2>Управління заявками клієнтів</h2>
+            <div id="requests-container">Завантаження заявок...</div>
         </section>
     </main>
 
     <script src="js/app.js"></script>
+    <script>
+        async function initAdmin() {
+            const roomRepo = new RoomRepository();
+            const bookingRepo = new BookingRepository();
+            const notifier = NotificationService.getInstance();
+
+            const roomsContainer = document.getElementById('rooms-container');
+            const requestsContainer = document.getElementById('requests-container');
+
+            try {
+                const rooms = await roomRepo.getOffers();
+                roomsContainer.innerHTML = `
+                    <table border="1" cellpadding="8" style="width:100%; border-collapse: collapse; margin-top: 10px;">
+                        <tr><th>ID</th><th>Номер</th><th>Тип</th><th>Ціна</th><th>Статус</th><th>Дії</th></tr>
+                        ${rooms.map(r => `
+                            <tr>
+                                <td>${r.id}</td>
+                                <td>${r.number}</td>
+                                <td>${r.type}</td>
+                                <td>${r.price} грн</td>
+                                <td>${r.status}</td>
+                                <td>
+                                    <button onclick="deleteRoom('${r.id}')">Видалити</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                `;
+            } catch (err) {
+                notifier.showError('Помилка завантаження номерів');
+                roomsContainer.innerHTML = 'Помилка завантаження даних.';
+            }
+
+            try {
+                const requests = await bookingRepo.getRequests();
+                requestsContainer.innerHTML = `
+                    <table border="1" cellpadding="8" style="width:100%; border-collapse: collapse; margin-top: 10px;">
+                        <tr><th>ID</th><th>Клієнт</th><th>Телефон</th><th>ID Номера</th><th>Статус</th><th>Змінити статус</th></tr>
+                        ${requests.map(req => `
+                            <tr>
+                                <td>${req.id}</td>
+                                <td>${req.clientName}</td>
+                                <td>${req.clientPhone}</td>
+                                <td>${req.roomId}</td>
+                                <td><b>${req.status}</b></td>
+                                <td>
+                                    <select onchange="changeStatus('${req.id}', this.value)">
+                                        <option value="В обробці" ${req.status === 'В обробці' ? 'selected' : ''}>В обробці</option>
+                                        <option value="Підтверджено" ${req.status === 'Підтверджено' ? 'selected' : ''}>Підтверджено</option>
+                                        <option value="Скасовано" ${req.status === 'Скасовано' ? 'selected' : ''}>Скасовано</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                `;
+            } catch (err) {
+                notifier.showError('Помилка завантаження заявок');
+                requestsContainer.innerHTML = 'Помилка завантаження заявок.';
+            }
+        }
+
+        async function deleteRoom(id) {
+            if (!confirm('Ви дійсно бажаєте видалити цю пропозицію?')) return;
+            try {
+                const roomRepo = new RoomRepository();
+                await roomRepo.deleteOffer(id);
+                NotificationService.getInstance().showSuccess('Пропозицію успішно видалено!');
+                initAdmin();
+            } catch (err) {
+                NotificationService.getInstance().showError(err.message);
+            }
+        }
+
+        async function changeStatus(id, newStatus) {
+            try {
+                const bookingRepo = new BookingRepository();
+                await bookingRepo.updateRequestStatus(id, newStatus);
+                NotificationService.getInstance().showSuccess('Статус заявки оновлено!');
+            } catch (err) {
+                NotificationService.getInstance().showError(err.message);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initAdmin);
+    </script>
 </body>
 </html>

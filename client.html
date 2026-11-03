@@ -2,30 +2,106 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Готель — Клієнтська сторінка</title>
+    <title>Готель «Комфорт» - Клієнт</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header>
         <h1>Готель «Комфорт»</h1>
         <p>Перегляд доступних номерів та бронювання</p>
+        <a href="admin.html" style="color: white; text-decoration: underline;">Перейти в панель адміністратора</a>
     </header>
 
     <main>
-        <div id="status-message" class="message-box hidden"></div>
+        <div id="notification"></div>
 
         <section>
             <h2>Доступні номери</h2>
-            <div id="rooms-loader" class="loader">Завантаження номерів...</div>
-            <div id="rooms-container"></div>
+            <div id="rooms-container">Завантаження номерів...</div>
+        </section>
+
+        <section style="margin-top: 30px;">
+            <h2>Створити заявку на бронювання</h2>
+            <form id="booking-form" onsubmit="handleCreateBooking(event)">
+                <div style="margin-bottom: 10px;">
+                    <label>Виберіть номер (ID):</label><br>
+                    <input type="text" id="roomIdInput" placeholder="Наприклад, 1" required style="padding: 8px; width: 300px;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>Ваше ПІБ:</label><br>
+                    <input type="text" id="clientName" placeholder="Іван Петренко" required style="padding: 8px; width: 300px;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>Номер телефону:</label><br>
+                    <input type="text" id="clientPhone" placeholder="+380671234567" required style="padding: 8px; width: 300px;">
+                </div>
+                <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer;">Забронювати</button>
+            </form>
         </section>
     </main>
 
-    <footer>
+    <footer style="margin-top: 40px; text-align: center;">
         <p>Система управління готелем &copy; 2026</p>
     </footer>
 
     <script src="js/app.js"></script>
+    <script>
+        async function initClient() {
+            const roomRepo = new RoomRepository();
+            const roomsContainer = document.getElementById('rooms-container');
+
+            try {
+                const rooms = await roomRepo.getOffers();
+                roomsContainer.innerHTML = `
+                    <table border="1" cellpadding="8" style="width:100%; border-collapse: collapse; margin-top: 10px;">
+                        <tr><th>ID</th><th>Номер</th><th>Тип</th><th>Ціна</th><th>Статус</th></tr>
+                        ${rooms.map(r => `
+                            <tr>
+                                <td>${r.id}</td>
+                                <td>${r.number}</td>
+                                <td>${r.type}</td>
+                                <td>${r.price} грн</td>
+                                <td><b>${r.status}</b></td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                `;
+            } catch (err) {
+                NotificationService.getInstance().showError('Помилка завантаження номерів з сервера');
+                roomsContainer.innerHTML = 'Не вдалося завантажити номери. Перевірте, чи запущено json-server.';
+            }
+        }
+
+        async function handleCreateBooking(event) {
+            event.preventDefault();
+
+            const roomId = document.getElementById('roomIdInput').value.trim();
+            const clientName = document.getElementById('clientName').value.trim();
+            const clientPhone = document.getElementById('clientPhone').value.trim();
+
+            if (!roomId || !clientName || !clientPhone) {
+                NotificationService.getInstance().showError('Заповніть усі поля!');
+                return;
+            }
+
+            try {
+                const bookingRepo = new BookingRepository();
+                const newRequest = await bookingRepo.createRequest({
+                    roomId,
+                    clientName,
+                    clientPhone,
+                    status: 'В обробці',
+                    createdAt: new Date().toISOString()
+                });
+
+                NotificationService.getInstance().showSuccess(`Заявку #${newRequest.id} успішно створено!`);
+                document.getElementById('booking-form').reset();
+            } catch (err) {
+                NotificationService.getInstance().showError(err.message);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initClient);
+    </script>
 </body>
 </html>
